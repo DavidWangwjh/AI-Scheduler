@@ -12,7 +12,7 @@ export default function Home() {
   ];
 
   const todoList = [
-    { name: "CS 140 PA1", dueDate: "1/16", subItems: [] },
+    { name: "CS 140 PA1 dj absjhdb as djbas dnas djbnas jdba", dueDate: "1/16", subItems: [] },
     {
       name: "Final Project",
       dueDate: "1/25",
@@ -34,9 +34,9 @@ export default function Home() {
   });
 
   return (
-    <div className="flex w-4/5 p-5 gap-5">
+    <div className="flex w-4/5 p-5 gap-5 md:flex-row flex-col">
       {/* Schedule Section */}
-      <div className="flex flex-col w-1/2 border-2 border-black p-5">
+      <div className="flex flex-col w-full md:w-1/2 border-2 border-black p-5">
         <h2 className="mb-4 text-center text-2xl">Schedule</h2>
         {scheduleWithDuration.map((entry, index) => (
           <div
@@ -59,19 +59,19 @@ export default function Home() {
             </div>
           </div>
         ))}
-        <div className="flex mt-5">
+        <div className="flex mt-5 gap-2">
           <input type="text" placeholder="Type here..." className="flex-1 border-2 border-black p-1" />
-          <button className="ml-2 border-2 border-black p-1">Send</button>
+          <button className="w-20 border-2 border-black p-1">Send</button>
         </div>
       </div>
 
       {/* To-Do List Section */}
-      <div className="w-1/2 border-2 border-black p-5">
+      <div className="w-full md:w-1/2 border-2 border-black p-5">
         <h2 className="mb-4 text-center text-2xl">To Do List</h2>
         {todoList.map((task, index) => (
           <div key={index} className="mb-2 border-2 border-black rounded-md p-2">
-            <div className="flex justify-between">
-              <input type="checkbox" className="w-4"/>
+            <div className="flex justify-between items-start">
+              <input type="checkbox" className="w-4 mt-1 mr-2"/>
               <h3>{task.name}</h3>
               <h4>{task.dueDate}</h4>
             </div>
@@ -80,8 +80,8 @@ export default function Home() {
                 <h4>Tasks</h4>
                 <div className="flex flex-col gap-2 border-2 border-black rounded-md p-2"> 
                   {task.subItems.map((subItem, subIndex) => (
-                    <div key={subIndex} className="flex items-start gap-2">
-                      <input type="checkbox" className="w-4 mt-1"/>
+                    <div key={subIndex} className="flex items-start">
+                      <input type="checkbox" className="w-4 mt-1 mr-2"/>
                       <span>{subItem}</span>
                     </div>
                   ))}
