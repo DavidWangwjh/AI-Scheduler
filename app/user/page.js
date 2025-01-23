@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export default function Home() {
+export default function UserPage() {
   return (
     <div>
       <h1>User page</h1>

@@ -1,5 +1,5 @@
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-
+import Link from 'next/link';
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,7 @@ import {
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "/user",
     icon: Home,
   },
   {
