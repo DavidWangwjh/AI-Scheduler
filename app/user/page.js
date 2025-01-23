@@ -1,25 +1,32 @@
-export default function Home() {
-  // Hardcoded data for schedule and to-do list
-  const schedule = [
-    { start_time: "8:00AM", end_time: "10:00AM", item: "Get ready for CS100 at 10:00AM s djna sdjn asjnd ajns d d abs dbhsa bhd asbhdabsh " },
-    { start_time: "10:00AM", end_time: "11:00AM", item: "CS100" },
-    { start_time: "11:00AM", end_time: "1:00PM", item: "Lunch with lab partners" },
-    { start_time: "1:00PM", end_time: "4:00PM", item: "Lab class" },
-    { start_time: "4:00PM", end_time: "6:00PM", item: "Lab Discussion" },
-    { start_time: "6:00PM", end_time: "7:00PM", item: "Dinner with family at Cheesecake Factory" },
-    { start_time: "7:00PM", end_time: "9:00PM", item: "Workout at 24hr fitness" },
-    { start_time: "9:00PM", end_time: "11:00PM", item: "Work on CS140 PA1" },
-  ];
+"use client"
 
-  const todoList = [
-    { name: "CS 140 PA1 dj absjhdb as djbas dnas djbnas jdba", dueDate: "1/16", subItems: [] },
-    {
-      name: "Final Project",
-      dueDate: "1/25",
-      subItems: ["Set up repo", "Write report da sjnd jans djnas djnas jnd asjnd ajns "],
-    },
-    { name: "Final exam", dueDate: "1/28", subItems: [] },
-  ];
+import { useState } from 'react';
+
+// Hardcoded data for schedule and to-do list
+const scheduleData = [
+  { start_time: "8:00AM", end_time: "10:00AM", item: "Get ready for CS100 at 10:00AM s djna sdjn asjnd ajns d d abs dbhsa bhd asbhdabsh " },
+  { start_time: "10:00AM", end_time: "11:00AM", item: "CS100" },
+  { start_time: "11:00AM", end_time: "1:00PM", item: "Lunch with lab partners" },
+  { start_time: "1:00PM", end_time: "4:00PM", item: "Lab class" },
+  { start_time: "4:00PM", end_time: "6:00PM", item: "Lab Discussion" },
+  { start_time: "6:00PM", end_time: "7:00PM", item: "Dinner with family at Cheesecake Factory" },
+  { start_time: "7:00PM", end_time: "9:00PM", item: "Workout at 24hr fitness" },
+  { start_time: "9:00PM", end_time: "11:00PM", item: "Work on CS140 PA1" },
+];
+
+const todoListData = [
+  { name: "CS 140 PA1 dj absjhdb as djbas dnas djbnas jdba", dueDate: "1/16", subItems: [] },
+  {
+    name: "Final Project",
+    dueDate: "1/25",
+    subItems: ["Set up repo", "Write report da sjnd jans djnas djnas jnd asjnd ajns "],
+  },
+  { name: "Final exam", dueDate: "1/28", subItems: [] },
+];
+
+export default function Home() {
+  const [todoList, setTodoList] = useState(todoListData);
+  const [schedule, setSchedule] = useState(scheduleData);
 
   // Calculate the duration in hours for each schedule item
   const scheduleWithDuration = schedule.map((entry) => {
@@ -32,6 +39,47 @@ export default function Home() {
     const duration = end - start;
     return { ...entry, duration };
   });
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [newTodo, setNewTodo] = useState({ name: '', dueDate: '', subItems: [] });
+
+  const handleAddTodo = () => {
+    setShowPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    setNewTodo({ name: '', dueDate: '', subItems: [] });
+    setShowPopup(false);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewTodo({
+      ...newTodo,
+      [name]: value,
+    });
+  };
+
+  const handleAddSubItem = () => {
+    setNewTodo({
+      ...newTodo,
+      subItems: [...newTodo.subItems, ''],
+    });
+  };
+
+  const handleSubItemChange = (index, value) => {
+    const updatedSubItems = newTodo.subItems.map((item, i) => (i === index ? value : item));
+    setNewTodo({
+      ...newTodo,
+      subItems: updatedSubItems,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setTodoList([...todoList, newTodo]);
+    handleClosePopup();
+  };
 
   return (
     <div className="flex w-4/5 p-5 gap-5 md:flex-row flex-col">
@@ -67,7 +115,7 @@ export default function Home() {
 
       {/* To-Do List Section */}
       <div className="w-full md:w-1/2 border-2 border-black p-5">
-        <h2 className="mb-4 text-center text-2xl">To Do List</h2>
+        <h2 className="mb-4 text-center text-2xl">To-Do List</h2>
         {todoList.map((task, index) => (
           <div key={index} className="mb-2 border-2 border-black rounded-md p-2">
             <div className="flex justify-between items-start">
@@ -90,7 +138,63 @@ export default function Home() {
             )}
           </div>
         ))}
+        <button onClick={handleAddTodo} className="mt-4 p-2 border-2 border-black rounded-md">+ Add To-Do</button>
       </div>
+
+      {showPopup && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-md">
+            <h3 className="text-xl mb-4">Add New To-Do Item</h3>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                name="name"
+                placeholder="Item Name"
+                value={newTodo.name}
+                onChange={handleInputChange}
+                className="mb-2 p-1 border-2 border-black w-full"
+                required
+              />
+              <input
+                type="date"
+                name="dueDate"
+                value={newTodo.dueDate}
+                onChange={handleInputChange}
+                className="mb-2 p-1 border-2 border-black w-full"
+                min={new Date().toISOString().split('T')[0]}
+                required
+              />
+              <div className="mb-2">
+                <h4>Sub Items (optional)</h4>
+                {newTodo.subItems.map((subItem, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={`Sub Item ${index + 1}`}
+                      value={subItem}
+                      onChange={(e) => handleSubItemChange(index, e.target.value)}
+                      className="mb-1 p-1 border-2 border-black w-full"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSubItem(index)}
+                      className="mb-1 p-1 border-2 border-black rounded-md"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={handleAddSubItem} className="mt-2 p-1 border-2 border-black rounded-md">+ Add Sub Item</button>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={handleClosePopup} className="p-1 border-2 border-black rounded-md">Cancel</button>
+                <button type="submit" className="p-1 border-2 border-black rounded-md">Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

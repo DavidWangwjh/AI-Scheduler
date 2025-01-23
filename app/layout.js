@@ -25,8 +25,8 @@ export default function RootLayout({ children }) {
       <html lang="en">
         <body>
           <SidebarProvider>
-            <AppSidebar />
-            <SidebarTrigger />
+            {/* <AppSidebar />
+            <SidebarTrigger /> */}
             <main>
               {children}
             </main>
