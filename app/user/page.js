@@ -1,200 +1,442 @@
-"use client"
+"use client";
+import React, { useState, KeyboardEvent } from "react";
+import { UserAnalysis } from "@/components/ui/userAnalysis"
 
-import { useState } from 'react';
+export default function Page() {
+  // ------------------------- State -------------------------
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      title: "CS 140 PA1 dj asbjhdb as djbas dnas djbnas jdba",
+      completed: false,
+      dueDate: "1/16",
+    },
+    {
+      id: 2,
+      title: "Final Project",
+      completed: false,
+      dueDate: "1/25",
+      subTasks: [
+        { id: 21, title: "Set up repo", completed: false },
+        {
+          id: 22,
+          title: "Write report da sjnd jans djnas djnas jnd asjnd ajns nkd asjnd ajns djasnd ajn",
+          completed: false,
+        },
+      ],
+    },
+    {
+      id: 3,
+      title: "Final exam",
+      completed: false,
+      dueDate: "1/28",
+    },
+  ]);
 
-// Hardcoded data for schedule and to-do list
-const scheduleData = [
-  { start_time: "8:00AM", end_time: "10:00AM", item: "Get ready for CS100 at 10:00AM s djna sdjn asjnd ajns d d abs dbhsa bhd asbhdabsh " },
-  { start_time: "10:00AM", end_time: "11:00AM", item: "CS100" },
-  { start_time: "11:00AM", end_time: "1:00PM", item: "Lunch with lab partners" },
-  { start_time: "1:00PM", end_time: "4:00PM", item: "Lab class" },
-  { start_time: "4:00PM", end_time: "6:00PM", item: "Lab Discussion" },
-  { start_time: "6:00PM", end_time: "7:00PM", item: "Dinner with family at Cheesecake Factory" },
-  { start_time: "7:00PM", end_time: "9:00PM", item: "Workout at 24hr fitness" },
-  { start_time: "9:00PM", end_time: "11:00PM", item: "Work on CS140 PA1" },
-];
+  const [scheduleItems] = useState([
+    { id: 1, time: "10:00AM", description: "CS100" },
+    { id: 2, time: "11:00AM", description: "Lunch with lab partners" },
+    { id: 3, time: "1:00PM", description: "Lab class" },
+    { id: 4, time: "4:00PM", description: "Lab Discussion dbakshj djn " },
+    {
+      id: 5,
+      time: "6:00PM",
+      description: "Dinner with family at Cheesecake Factory Dinner Dinner Dinner Dinner Dinner Dinner Dinner Dinner Dinner",
+    },
+    { id: 6, time: "7:00PM", description: "Workout at 24hr fitness" },
+    { id: 7, time: "9:00PM", description: "Work on CS140 PA1" },
+  ]);
 
-const todoListData = [
-  { name: "CS 140 PA1 dj absjhdb as djbas dnas djbnas jdba", dueDate: "1/16", subItems: [] },
-  {
-    name: "Final Project",
-    dueDate: "1/25",
-    subItems: ["Set up repo", "Write report da sjnd jans djnas djnas jnd asjnd ajns "],
-  },
-  { name: "Final exam", dueDate: "1/28", subItems: [] },
-];
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
 
-export default function Home() {
-  const [todoList, setTodoList] = useState(todoListData);
-  const [schedule, setSchedule] = useState(scheduleData);
+  // For the Add-Task modal
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDueDate, setNewTaskDueDate] = useState("");
+  const [newSubTasks, setNewSubTasks] = useState([]);
 
-  // Calculate the duration in hours for each schedule item
-  const scheduleWithDuration = schedule.map((entry) => {
-    const [startHour, startPeriod] = entry.start_time.match(/(\d+):\d+(AM|PM)/).slice(1);
-    const [endHour, endPeriod] = entry.end_time.match(/(\d+):\d+(AM|PM)/).slice(1);
+  // ------------------------- Handlers -------------------------
+  const handleToggleTaskCompletion = (taskId) => {
+    if (!taskId) return;
 
-    const start = parseInt(startHour) + (startPeriod === "PM" && startHour !== "12" ? 12 : 0);
-    const end = parseInt(endHour) + (endPeriod === "PM" && endHour !== "12" ? 12 : 0);
-
-    const duration = end - start;
-    return { ...entry, duration };
-  });
-
-  const [showPopup, setShowPopup] = useState(false);
-  const [newTodo, setNewTodo] = useState({ name: '', dueDate: '', subItems: [] });
-
-  const handleAddTodo = () => {
-    setShowPopup(true);
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => {
+        // Toggle main task
+        if (task.id === taskId) {
+          return { ...task, completed: !task.completed };
+        }
+        // Otherwise, check subTasks
+        if (task.subTasks && task.subTasks.length > 0) {
+          return {
+            ...task,
+            subTasks: task.subTasks.map((sub) =>
+              sub.id === taskId ? { ...sub, completed: !sub.completed } : sub
+            ),
+          };
+        }
+        return task;
+      })
+    );
   };
 
-  const handleClosePopup = () => {
-    setNewTodo({ name: '', dueDate: '', subItems: [] });
-    setShowPopup(false);
+  const handleOpenAddTaskModal = () => {
+    setShowAddTaskModal(true);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTodo({
-      ...newTodo,
-      [name]: value,
+  const handleCloseAddTaskModal = () => {
+    setShowAddTaskModal(false);
+    setNewTaskTitle("");
+    setNewTaskDueDate("");
+    setNewSubTasks([]);
+  };
+
+  const handleAddSubTask = () => {
+    const newId = Date.now() + Math.random();
+    setNewSubTasks((prev) => [
+      ...prev,
+      { id: newId, title: "", completed: false },
+    ]);
+  };
+
+  const handleRemoveSubTask = (index) => {
+    setNewSubTasks((prev) => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
     });
   };
 
-  const handleAddSubItem = () => {
-    setNewTodo({
-      ...newTodo,
-      subItems: [...newTodo.subItems, ''],
+  const handleSubTaskTitleChange = (index, value) => {
+    setNewSubTasks((prev) => {
+      const updated = [...prev];
+      updated[index].title = value;
+      return updated;
     });
   };
 
-  const handleSubItemChange = (index, value) => {
-    const updatedSubItems = newTodo.subItems.map((item, i) => (i === index ? value : item));
-    setNewTodo({
-      ...newTodo,
-      subItems: updatedSubItems,
-    });
+  const handleSaveTask = () => {
+    if (!newTaskTitle.trim()) return;
+
+    const newId = Date.now();
+    const finalSubTasks = newSubTasks
+      .filter((sub) => sub.title.trim().length > 0)
+      .map((sub) => ({ ...sub, title: sub.title.trim() }));
+
+    const newTask = {
+      id: newId,
+      title: newTaskTitle.trim(),
+      completed: false,
+      dueDate: newTaskDueDate.trim(),
+      subTasks: finalSubTasks.length > 0 ? finalSubTasks : undefined,
+    };
+
+    setTasks((prev) => [...prev, newTask]);
+    handleCloseAddTaskModal();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setTodoList([...todoList, newTodo]);
-    handleClosePopup();
+  const handleChatSend = () => {
+    if (!chatInput.trim()) return;
+
+    const userMessage = {
+      id: Date.now(),
+      sender: "User",
+      text: chatInput.trim(),
+    };
+
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInput("");
+
+    // Simulate AI Response
+    const aiResponse = {
+      id: Date.now() + 1,
+      sender: "AI",
+      text: "This is a simulated AI response for: " + userMessage.text,
+    };
+    setChatMessages((prev) => [...prev, aiResponse]);
+  };
+
+  const handleKeyDownChat = (event) => {
+    if (event.key === "Enter") handleChatSend();
   };
 
   return (
-    <div className="flex w-4/5 p-5 gap-5 md:flex-row flex-col">
-      {/* Schedule Section */}
-      <div className="flex flex-col w-full md:w-1/2 border-2 border-black p-5">
-        <h2 className="mb-4 text-center text-2xl">Schedule</h2>
-        {scheduleWithDuration.map((entry, index) => (
-          <div
-            key={index}
-            className="flex mb-2 gap-4"
-            style={{ minHeight: `calc(${entry.duration} * 1.2rem + 1rem)` }}
-          >
-            <div className="w-16 text-right">
-              {entry.start_time}
-            </div>
-            <div
-              className="flex-1 border-2 border-black rounded-md p-1 overflow-hidden"
-              style={{
-                display: '-webkit-box',
-                WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: entry.duration,
-              }}
-            >
-              {entry.item}
-            </div>
+    <main className="flex flex-row min-h-screen justify-start items-start">
+      {/* SIDEBAR */}
+      <nav className="bg-gray-100 w-50 h-screen p-4 flex flex-col space-y-2 md:hidden">
+        <div
+          tabIndex={0}
+          aria-label="To-Do List"
+          onClick={() => {}}
+          onKeyDown={() => {}}
+          className="cursor-pointer p-2 hover:bg-gray-200"
+        >
+          &#9776; To-Do List
+        </div>
+        <div
+          tabIndex={0}
+          aria-label="Today's Schedule"
+          onClick={() => {}}
+          onKeyDown={() => {}}
+          className="cursor-pointer p-2 hover:bg-gray-200"
+        >
+          &#128197; Schedule
+        </div>
+        <div
+          tabIndex={0}
+          aria-label="User Analysis"
+          onClick={() => {}}
+          onKeyDown={() => {}}
+          className="cursor-pointer p-2 hover:bg-gray-200"
+        >
+          &#128200; Analysis
+        </div>
+      </nav>
+
+      {/* MAIN CONTENT */}
+      <div className="grid md:grid-cols-3 p-4 gap-4 w-full h-full">
+        {/* TO-DO LIST CARD */}
+        <section className="w-full bg-white p-4 shadow rounded">
+          <h2 className="text-xl font-bold mb-4">To-Do List</h2>
+          <div className="mb-4 flex flex-col space-y-2">
+            {tasks.map((task) => (
+              <div key={task.id} className="pl-2 border rounded p-2">
+                <div className="flex items-center justify-between space-x-4">
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => handleToggleTaskCompletion(task.id)}
+                    className="cursor-pointer"
+                    aria-label={`Mark ${task.title} as completed`}
+                  />
+                  <span
+                    className={task.completed ? "line-through text-gray-400" : ""}
+                  >
+                    {task.title}
+                  </span>
+                  <span className="ml-auto">{task.dueDate}</span>
+                </div>
+
+                {/* SUBTASKS */}
+                {task.subTasks && task.subTasks.length > 0 && (
+                  <div className="ml-6 mt-2">
+                    {task.subTasks.map((sub) => (
+                      <div key={sub.id} className="flex items-center space-x-2 mb-1">
+                        <input
+                          type="checkbox"
+                          checked={sub.completed}
+                          onChange={() => handleToggleTaskCompletion(sub.id)}
+                          className="cursor-pointer"
+                          aria-label={`Mark ${sub.title} as completed`}
+                        />
+                        <span
+                          className={
+                            sub.completed ? "line-through text-gray-400" : ""
+                          }
+                        >
+                          {sub.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-        <div className="flex mt-5 gap-2">
-          <input type="text" placeholder="Type here..." className="flex-1 border-2 border-black p-1" />
-          <button className="w-20 border-2 border-black p-1">Send</button>
+
+          {/* Add Task button */}
+          <button
+            tabIndex={0}
+            aria-label="Open Add Task Modal"
+            onClick={handleOpenAddTaskModal}
+            className="bg-orange-400 text-white px-3 py-1 rounded"
+          >
+            Add Task
+          </button>
+        </section>
+
+        {/* TODAY'S SCHEDULE CARD */}
+        <section className="bg-white p-4 shadow rounded">
+          <h2 className="text-xl font-bold mb-4">Today’s Schedule</h2>
+          <div className="flex flex-col space-y-2">
+            {scheduleItems.map((item) => (
+              <div
+                key={item.id}
+                className="border rounded p-2 flex items-center justify-between"
+              >
+                <span className="mr-4">{item.time}</span>
+                <span>{item.description}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* RIGHT COLUMN (User Analysis + Chat) */}
+        <div className="flex flex-col gap-4 w-full">
+          <UserAnalysis></UserAnalysis>
+
+          {/* CHAT AREA */}
+          <section className="bg-white p-4 shadow rounded flex flex-col flex-1">
+            <h2 className="text-xl font-bold mb-2">Chat</h2>
+            <div className="mb-2 overflow-y-auto border p-2 rounded flex-1">
+              {chatMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={
+                    msg.sender === "User"
+                      ? "text-right mb-2"
+                      : "text-left mb-2 text-gray-600"
+                  }
+                >
+                  <div
+                    className={
+                      msg.sender === "User"
+                        ? "inline-block bg-orange-200 rounded px-2 py-1"
+                        : "inline-block bg-gray-200 rounded px-2 py-1"
+                    }
+                  >
+                    <span className="text-sm">{msg.text}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                tabIndex={0}
+                aria-label="Chat message input"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={handleKeyDownChat}
+                placeholder="Type your message..."
+                className="border rounded p-1 flex-1"
+              />
+              <button
+                tabIndex={0}
+                aria-label="Send chat message"
+                onClick={handleChatSend}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleChatSend();
+                }}
+                className="bg-white border rounded px-3 py-1 hover:bg-gray-100"
+              >
+                Send
+              </button>
+            </div>
+          </section>
         </div>
       </div>
 
-      {/* To-Do List Section */}
-      <div className="w-full md:w-1/2 border-2 border-black p-5">
-        <h2 className="mb-4 text-center text-2xl">To-Do List</h2>
-        {todoList.map((task, index) => (
-          <div key={index} className="mb-2 border-2 border-black rounded-md p-2">
-            <div className="flex justify-between items-start">
-              <input type="checkbox" className="w-4 mt-1 mr-2"/>
-              <h3>{task.name}</h3>
-              <h4>{task.dueDate}</h4>
-            </div>
-            {task.subItems.length > 0 && (
-              <div className="pl-5">
-                <h4>Tasks</h4>
-                <div className="flex flex-col gap-2 border-2 border-black rounded-md p-2"> 
-                  {task.subItems.map((subItem, subIndex) => (
-                    <div key={subIndex} className="flex items-start">
-                      <input type="checkbox" className="w-4 mt-1 mr-2"/>
-                      <span>{subItem}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-        <button onClick={handleAddTodo} className="mt-4 p-2 border-2 border-black rounded-md">+ Add To-Do</button>
-      </div>
+      {/* ADD-TASK MODAL */}
+      {showAddTaskModal && (
+        <div
+          tabIndex={0}
+          aria-label="Add Task Modal Overlay"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") handleCloseAddTaskModal();
+          }}
+        >
+          <div className="bg-white p-4 rounded shadow w-80">
+            <h2 className="text-lg font-bold mb-2">Add New Task</h2>
+            
+            {/* TITLE INPUT */}
+            <label className="block mb-1" htmlFor="taskTitle">
+              Title
+            </label>
+            <input
+              id="taskTitle"
+              type="text"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              className="border rounded p-1 w-full mb-2"
+            />
 
-      {showPopup && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-md">
-            <h3 className="text-xl mb-4">Add New To-Do Item</h3>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Item Name"
-                value={newTodo.name}
-                onChange={handleInputChange}
-                className="mb-2 p-1 border-2 border-black w-full"
-                required
-              />
-              <input
-                type="date"
-                name="dueDate"
-                value={newTodo.dueDate}
-                onChange={handleInputChange}
-                className="mb-2 p-1 border-2 border-black w-full"
-                min={new Date().toISOString().split('T')[0]}
-                required
-              />
-              <div className="mb-2">
-                <h4>Sub Items (optional)</h4>
-                {newTodo.subItems.map((subItem, index) => (
-                  <div key={index} className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder={`Sub Item ${index + 1}`}
-                      value={subItem}
-                      onChange={(e) => handleSubItemChange(index, e.target.value)}
-                      className="mb-1 p-1 border-2 border-black w-full"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSubItem(index)}
-                      className="mb-1 p-1 border-2 border-black rounded-md"
+            {/* DUE DATE INPUT */}
+            <label className="block mb-1" htmlFor="dueDate">
+              Due Date
+            </label>
+            <input
+              id="dueDate"
+              type="text"
+              value={newTaskDueDate}
+              onChange={(e) => setNewTaskDueDate(e.target.value)}
+              className="border rounded p-1 w-full mb-2"
+            />
+
+            {/* SUB-TASKS */}
+            <div className="mb-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-semibold">Sub-Tasks</span>
+                <button
+                  tabIndex={0}
+                  aria-label="Add subtask"
+                  onClick={handleAddSubTask}
+                  className="bg-gray-200 text-xs px-2 py-1 rounded"
+                >
+                  + Add
+                </button>
+              </div>
+
+              {newSubTasks.map((sub, index) => (
+                <div key={sub.id} className="flex items-center mb-1">
+                  <input
+                    type="text"
+                    value={sub.title}
+                    onChange={(e) => handleSubTaskTitleChange(index, e.target.value)}
+                    placeholder={`Sub-task #${index + 1}`}
+                    className="border rounded p-1 w-full mr-2"
+                  />
+                  <button
+                    tabIndex={0}
+                    aria-label="Remove subtask"
+                    onClick={() => handleRemoveSubTask(index)}
+                    className="text-gray-500 hover:text-red-500"
+                  >
+                    {/* You can use any icon you prefer, e.g., an SVG or emoji */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
                     >
-                      🗑️
-                    </button>
-                  </div>
-                ))}
-                <button type="button" onClick={handleAddSubItem} className="mt-2 p-1 border-2 border-black rounded-md">+ Add Sub Item</button>
-              </div>
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={handleClosePopup} className="p-1 border-2 border-black rounded-md">Cancel</button>
-                <button type="submit" className="p-1 border-2 border-black rounded-md">Add</button>
-              </div>
-            </form>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 
+                          2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-8V5a1 
+                          1 0 00-1-1h-4a1 1 0 00-1 1v2m-3 0h12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* ACTION BUTTONS */}
+            <div className="flex justify-end space-x-2">
+              <button
+                tabIndex={0}
+                aria-label="Cancel add task"
+                onClick={handleCloseAddTaskModal}
+                className="bg-gray-300 px-3 py-1 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                tabIndex={0}
+                aria-label="Save new task"
+                onClick={handleSaveTask}
+                className="bg-orange-400 text-white px-3 py-1 rounded"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </div>
+
+    </main>
   );
 }
