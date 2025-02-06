@@ -196,7 +196,7 @@ export default function Page() {
       {/* MAIN CONTENT */}
       <div className="grid md:grid-cols-3 p-4 gap-4 w-full h-full">
         {/* TO-DO LIST CARD */}
-        <section className="w-full bg-white p-4 shadow rounded">
+        <section className="w-full bg-white p-4 shadow-lg rounded">
           <h2 className="text-xl font-bold mb-4">To-Do List</h2>
           <div className="mb-4 flex flex-col space-y-2">
             {tasks.map((task) => (
@@ -256,7 +256,7 @@ export default function Page() {
         </section>
 
         {/* TODAY'S SCHEDULE CARD */}
-        <section className="bg-white p-4 shadow rounded">
+        <section className="bg-white p-4 shadow-lg rounded">
           <h2 className="text-xl font-bold mb-4">Today’s Schedule</h2>
           <div className="flex flex-col space-y-2">
             {scheduleItems.map((item) => (
@@ -276,7 +276,7 @@ export default function Page() {
           <UserAnalysis></UserAnalysis>
 
           {/* CHAT AREA */}
-          <section className="bg-white p-4 shadow rounded flex flex-col flex-1">
+          <section className="bg-white p-4 shadow-lg rounded flex flex-col flex-1">
             <h2 className="text-xl font-bold mb-2">Chat</h2>
             <div className="mb-2 overflow-y-auto border p-2 rounded flex-1">
               {chatMessages.map((msg) => (

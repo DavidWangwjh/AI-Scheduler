@@ -101,9 +101,9 @@ export function UserAnalysis() {
   };
 
   return (
-    <section className="bg-white p-4 shadow rounded flex flex-col space-y-4">
+    <section className="bg-white p-4 shadow-lg rounded flex flex-col space-y-4">
         <div className="flex flex-row justify-between">
-            <h2 className="text-xl font-bold mb-4">To-Do List</h2>
+            <h2 className="text-xl font-bold mb-4">Analysis</h2>
             {/* Dropdown top-right */}
             <div className="flex justify-end">
                 <select
